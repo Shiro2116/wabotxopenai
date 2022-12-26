@@ -9,6 +9,7 @@ const logger = pino();
 const { writeExifImg } = require("./lib/exif.js");
 const { downloader } = require("./lib");
 const { query } = require('express')
+const fetch = require('node-fetch')
 
 module.exports = sansekai = async (client, m, chatUpdate, store) => {
     try {
@@ -152,7 +153,14 @@ module.exports = sansekai = async (client, m, chatUpdate, store) => {
                                 if (Number(result.size.split(' MB')[0]) >= 50) {
                                     await m.reply('Ukuran Music Terlalu Besar!')
                                 } else {
-                                    await client.sendMessage(m.chat, { video: { url: result.UrlVideo }, mimetype: 'audio/mp4' }, { url: result.UrlVideo })
+                                    const responses = await fetch(result.UrlVideo)
+                                    const buffer = await responses.buffer()
+                                    fs.writeFileSync(`./temp/${m.chat}_yt.mp4`, buffer)
+                                    await client.sendMessage(m.chat, {
+                                        video: fs.readFileSync(`./temp/${m.chat}_yt.mp4`),
+                                        caption: result.title,
+                                        gifPlayback: true
+                                    })
                                     console.log('Success sending YouTube Video!')
                                 }
                             })
