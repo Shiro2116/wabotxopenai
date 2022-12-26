@@ -137,7 +137,7 @@ module.exports = sansekai = async (client, m, chatUpdate, store) => {
                                 if (Number(result.size.split(' MB')[0]) >= 50) {
                                     await m.reply('Ukuran Music Terlalu Besar!')
                                 } else {
-                                    await client.sendMessage(m.chat, { audio: { url: result.UrlMp3 }, mimetype: 'audio/mp4' }, { url: `${result.title}.mp3` })
+                                    await client.sendMessage(m.chat, { audio: { url: result.UrlMp3 }, mimetype: 'audio/mp4', ptt: true }, { url: `${result.UrlMp3}` })
                                     console.log('Success sending YouTube Audio!')
                                 }
                             })
@@ -169,6 +169,28 @@ module.exports = sansekai = async (client, m, chatUpdate, store) => {
                                 await m.reply('Maaf, sepertinya ada yang error!')
                             })
                         break
+                    case 'ttdl':
+                        await m.reply('Mohon tunggu ~ ...')
+                        downloader.ttdl(url)
+                            .then(async ({ result }) => {
+                                if (Number(result.size.split(' MB')[0]) >= 50) {
+                                    await m.reply('Ukuran Music Terlalu Besar!')
+                                } else {
+                                    const responses = await fetch(result.video)
+                                    const buffer = await responses.buffer()
+                                    fs.writeFileSync(`./temp/${m.sender}-tiktokdl.mp4`, buffer)
+                                    await client.sendMessage(m.chat, {
+                                        video: fs.readFileSync(`./temp/${m.sender}-tiktokdl.mp4`),
+                                        caption: 'Nih Bossku ~...',
+                                    })
+                                    console.log('Success sending Tiktok Video!')
+                                }
+                            })
+                            .catch(async (err) => {
+                                console.error(err)
+                                await m.reply('Maaf, sepertinya ada yang error!')
+                            })
+                        break
                     case 'play':
                         await m.reply('Mohon tunggu, sedang mencari lagu ~ ...')
                         downloader.ytSearch(q)
@@ -179,6 +201,36 @@ module.exports = sansekai = async (client, m, chatUpdate, store) => {
                                     await client.sendMessage(m.chat, { audio: { url: result.mp3 }, mimetype: 'audio/mp4' }, { url: `${result.mp3}` })
                                     console.log('Success sending YouTube Audio!')
                                 }
+                            })
+                            .catch(async (err) => {
+                                console.error(err)
+                                await m.reply('Maaf, sepertinya ada yang error!')
+                            })
+                        break
+                    case 'listsurah':
+                        await m.reply('Mohon tunggu ~ ...')
+                        downloader.listSurah()
+                            .then(async ({ result }) => {
+                                let list = '*── 「 AL-QUR\'AN 」 ──*\n\n'
+                                for (let i = 0; i < result.list.length; i++) {
+                                    list += `${result.list[i]}\n\n`
+                                }
+                                await m.reply(list)
+                                console.log('Success sending Al-Qur\'an list!')
+                            })
+                            .catch(async (err) => {
+                                console.error(err)
+                                await m.reply('Maaf, sepertinya ada yang error!')
+                            })
+                        break
+                    case 'chord':
+                        await m.reply('Mohon tunggu ~ ...')
+                        downloader.chord(q)
+                            .then(async ({ result }) => {
+                                const pesan = `Chord Guitar ${q}!\n\n`
+                                const pesan1 = result.result
+                                await m.reply(pesan1)
+                                console.log(`Success sending Chord Guitar ${q}!`)
                             })
                             .catch(async (err) => {
                                 console.error(err)
