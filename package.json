@@ -53,6 +53,5 @@
     "sagiri": "^3.1.1",
     "stream": "^0.0.2",
     "util": "^0.12.4",
-    "video-url-link": "git+https://github.com/YogaSakti/video-url-link.git"
   }
 }
